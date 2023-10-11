@@ -6,7 +6,7 @@ boolean debug_mode = true;
 
 // Controls
 ControlP5 cp5;
-Slider slider_line_iterations, slider_points, slider_speed, slider_line_noise, slider_point_noise, slider_vortex_rotation, slider_vortex_iterations;
+Slider slider_line_iterations, slider_points, slider_speed, slider_vortex_rotation, slider_vortex_iterations, slider_noise_scale, slider_noise_factor, slider_noise_falloff;
 Toggle toggle_vortex, toggle_debug;
 Button button_generate, button_reset, button_record;
 
@@ -31,10 +31,11 @@ int double_border = 2 * border;
 // Creature Default Properties
 float vortex_rotation = 5.0;
 float moving_speed = 1.0;
-float line_noise_magnitude = 0.0;
-float point_noise_magnitude = 0.0;
 int line_iterations = 10;
 int line_points = 20;
+float noise_falloff = 0.8;
+float noise_scale = 15.0;
+float noise_factor = 0.02;
 
 void setup() {
     // Setup the stage
@@ -44,6 +45,7 @@ void setup() {
     strokeJoin(ROUND);
     ellipseMode(CENTER);
     noiseSeed(100);
+    noiseDetail(8, noise_falloff);
 
     // Create the controls
     cp5 = new ControlP5(this);
@@ -94,9 +96,7 @@ Creature newCreature() {
     Creature temp_creature = new Creature(
                                     line_iterations, 
                                     line_points, 
-                                    moving_speed, 
-                                    line_noise_magnitude, 
-                                    point_noise_magnitude
+                                    moving_speed
                                 ); 
     return temp_creature;
 }

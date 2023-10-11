@@ -26,7 +26,7 @@ boolean debug_mode = true;
 
 // Controls
 ControlP5 cp5;
-Slider slider_line_iterations, slider_points, slider_speed, slider_line_noise, slider_point_noise, slider_vortex_rotation, slider_vortex_iterations;
+Slider slider_line_iterations, slider_points, slider_speed, slider_vortex_rotation, slider_vortex_iterations, slider_noise_scale, slider_noise_factor, slider_noise_falloff;
 Toggle toggle_vortex, toggle_debug;
 Button button_generate, button_reset, button_record;
 
@@ -51,10 +51,11 @@ int double_border = 2 * border;
 // Creature Default Properties
 float vortex_rotation = 5.0f;
 float moving_speed = 1.0f;
-float line_noise_magnitude = 0.0f;
-float point_noise_magnitude = 0.0f;
 int line_iterations = 10;
 int line_points = 20;
+float noise_falloff = 0.8f;
+float noise_scale = 15.0f;
+float noise_factor = 0.02f;
 
 public void setup() {
     // Setup the stage
@@ -64,6 +65,7 @@ public void setup() {
     strokeJoin(ROUND);
     ellipseMode(CENTER);
     noiseSeed(100);
+    noiseDetail(8, noise_falloff);
 
     // Create the controls
     cp5 = new ControlP5(this);
@@ -114,9 +116,7 @@ public Creature newCreature() {
     Creature temp_creature = new Creature(
                                     line_iterations, 
                                     line_points, 
-                                    moving_speed, 
-                                    line_noise_magnitude, 
-                                    point_noise_magnitude
+                                    moving_speed
                                 ); 
     return temp_creature;
 }
@@ -131,102 +131,111 @@ public String dateString() {
     return dateString;
 }
 public void setupControls() {
-	// Slider for the number of iterations between the vectors
+    // Slider for the number of iterations between the vectors
     slider_line_iterations = cp5.addSlider("setLineIterations")
-        .setLabel("Line iterations")
-        .setValue(line_iterations)
-        .setRange(1,30)
-        .setNumberOfTickMarks(30)
-        .setPosition(20,20)
-        .setSize(200,10)
-        .setVisible(show_controls)
-        ;
-
+       .setLabel("Line iterations")
+       .setValue(line_iterations)
+       .setRange(1,30)
+       .setNumberOfTickMarks(30)
+       .setPosition(20,20)
+       .setSize(200,10)
+       .setVisible(show_controls)
+       ;
+    
     // Slider for the number of points draw for each line
     slider_speed = cp5.addSlider("setMovingSpeed")
-        .setLabel("Moving speed")
-        .setValue(moving_speed)
-        .setRange(0,10)
-        .setNumberOfTickMarks(11)
-        .setPosition(20,40)
-        .setSize(200,10)
-        .setVisible(show_controls)
-        ;
-
+       .setLabel("Moving speed")
+       .setValue(moving_speed)
+       .setRange(0,10)
+       .setNumberOfTickMarks(11)
+       .setPosition(20,40)
+       .setSize(200,10)
+       .setVisible(show_controls)
+       ;
+    
     // Slider for the number of points draw for each line
     slider_points = cp5.addSlider("setPointsPerLine")
-        .setLabel("Points per line")
-        .setValue(line_points)
-        .setRange(2,1000)
-        .setNumberOfTickMarks(999)
-        .setPosition(20,60)
-        .setSize(200,10)
-        .setVisible(show_controls)
-        ;
-
+       .setLabel("Points per line")
+       .setValue(line_points)
+       .setRange(2,1000)
+       .setNumberOfTickMarks(999)
+       .setPosition(20,60)
+       .setSize(200,10)
+       .setVisible(show_controls)
+       ;
+    
     // Toggle for the vortex effect
     toggle_vortex = cp5.addToggle("setVortex")
-        .setLabel("Vortex")
-        .setValue(vortex_effect)
-        .setPosition(20,80)
-        .setSize(90,10)
-        .setVisible(show_controls);
-
+       .setLabel("Vortex")
+       .setValue(vortex_effect)
+       .setPosition(20,80)
+       .setSize(90,10)
+       .setVisible(show_controls);
+    
     // Toggle for the vortex effect
     toggle_debug = cp5.addToggle("setDebug")
-        .setLabel("Debug")
-        .setValue(debug_mode)
-        .setPosition(120,80)
-        .setSize(90,10)
-        .setVisible(show_controls);
-
+       .setLabel("Debug")
+       .setValue(debug_mode)
+       .setPosition(120,80)
+       .setSize(90,10)
+       .setVisible(show_controls);
+    
     // Slider to adjust the rotation of each vortex iteration
     slider_vortex_rotation = cp5.addSlider("setVortexRotation")
-        .setLabel("Vortex Rotation")
-        .setValue(vortex_rotation)
-        .setRange(0,90)
-        .setPosition(20,100)
-        .setSize(200,10)
-        .setVisible(show_controls);
-
+       .setLabel("Vortex Rotation")
+       .setValue(vortex_rotation)
+       .setRange(0,90)
+       .setPosition(20,100)
+       .setSize(200,10)
+       .setVisible(show_controls);
+    
     // Slider to adjust the numbers of vortex iterations
     slider_vortex_iterations = cp5.addSlider("setVortexIterations")
-        .setLabel("Vortex Iterations")
-        .setValue(vortex_iterations)
-        .setRange(1,10)
-        .setPosition(20,120)
-        .setSize(200,10)
-        .setVisible(show_controls);
+       .setLabel("Vortex Iterations")
+       .setValue(vortex_iterations)
+       .setRange(1,10)
+       .setPosition(20,120)
+       .setSize(200,10)
+       .setVisible(show_controls);
 
-    // Slider to adjust the amount of y-noise added to the points
-    slider_line_noise = cp5.addSlider("setLineNoise")
-        .setLabel("Line noise")
-        .setValue(line_noise_magnitude)
-        .setRange(0,200)
-        .setPosition(20,160)
-        .setSize(200,10)
-        .setVisible(show_controls);
+    // Slider to adjust the noise falloff for the details
+    slider_noise_scale = cp5.addSlider("setNoiseScale")
+       .setLabel("Noise scale")
+       .setValue(noise_scale)
+       .setRange(0,25)
+       .setPosition(20,200)
+       .setSize(200,10)
+       .setVisible(show_controls);
 
-    // Slider to adjust the amount of y-noise added to the points
-    slider_point_noise = cp5.addSlider("setPointNoise")
-        .setLabel("Point noise")
-        .setValue(point_noise_magnitude)
-        .setRange(0,25)
-        .setPosition(20,180)
-        .setSize(200,10)
-        .setVisible(show_controls);
+    // Slider to adjust the noise offset radius
+    slider_noise_falloff = cp5.addSlider("setNoiseFalloff")
+       .setLabel("Noise falloff")
+       .setValue(noise_falloff)
+       .setRange(0,1)
+       .setPosition(20,220)
+       .setSize(200,10)
+       .setVisible(show_controls);
 
+    // Slider to adjust the noise detail level
+    slider_noise_factor = cp5.addSlider("setNoiseFactor")
+       .setLabel("Noise factor")
+       .setValue(noise_factor)
+       .setRange(0.001f,0.1f)
+       .setPosition(20,240)
+       .setSize(200,10)
+       .setVisible(show_controls);
+    
     // create a new button with name 'buttonA'
     button_generate = cp5.addButton("createCreature")
-        .setLabel("Create")
-        .setValue(0)
-        .setPosition(width-80,20)
-        .setSize(60,50)
-        .setVisible(show_controls);
+       .setLabel("Create")
+       .setValue(0)
+       .setPosition(width - 80,20)
+       .setSize(60,50)
+       .setVisible(show_controls);
     
     button_record = cp5.addButton("saveSVG")
-		.setPosition(width-80,80)
-		.setSize(60, 20);
+        	.setPosition(width - 80,80)
+        	.setSize(60, 20);
 }
 
 // Toggle Controls
@@ -243,7 +252,7 @@ public void toggleControls() {
 }
 public void toggleControls(boolean show_hide) {
     show_controls = show_hide;
-
+    
     // show and hide default controls
     button_generate.setVisible(show_controls);
     button_reset.setVisible(show_controls);
@@ -257,10 +266,12 @@ public void updateControlValues() {
     vortex_rotation = slider_vortex_rotation.getValue();
     vortex_iterations = PApplet.parseInt(slider_vortex_iterations.getValue());
     moving_speed = slider_speed.getValue();
-    line_noise_magnitude = slider_line_noise.getValue();
     line_iterations = PApplet.parseInt(slider_line_iterations.getValue());
     line_points = PApplet.parseInt(slider_points.getValue());
-    point_noise_magnitude = slider_point_noise.getValue();
+    noise_falloff = slider_noise_falloff.getValue();
+    noise_scale = slider_noise_scale.getValue();
+    noise_factor = slider_noise_factor.getValue();
+    noiseDetail(8, noise_falloff);
 }
 
 // Update parameters 
@@ -269,17 +280,15 @@ public void resetControls() {
     slider_vortex_rotation.setValue(0.0f);
     slider_vortex_iterations.setValue(0.0f);
     slider_speed.setValue(0);
-    slider_line_noise.setValue(0);
     slider_line_iterations.setValue(1);
     slider_points.setValue(400);
-    slider_point_noise.setValue(0);
     hideControls();
     createCreature();
 }
 
 
 public void saveSVG() {
-	record = true;
+    record = true;
 }
 class Creature { 
     
@@ -289,7 +298,6 @@ class Creature {
     PVector v1, v2, v3, v4;
     PVector h1, h2, h3, h4;
     PVector c1, c2, c3, c4;
-    PVector n1, n2, n3, n4;
     
     // Moving Vector
     PVector m1, m2, m3, m4;
@@ -301,14 +309,12 @@ class Creature {
     
     // Noise
     float line_interpolation = 1 / PApplet.parseFloat(line_iterations);
-    float line_noise_magnitude = 0.0f;
-    float point_noise_magnitude = 0.0f;
     float noise_progress = 0.0f;
     float moving_speed = 3.0f;
     float decrease_rate = 0.98f;
     int noise_seed = 1;
     
-    Creature(int iterations, int points, float speed, float line_magnitude, float point_magnitude) { 
+    Creature(int iterations, int points, float speed) { 
         // Creature specific noise seed
         noise_seed = floor(random(100));
         noiseDetail(1);
@@ -317,8 +323,6 @@ class Creature {
         line_iterations = iterations;
         line_points = points;
         moving_speed = speed;
-        line_noise_magnitude = line_magnitude;
-        point_noise_magnitude = point_magnitude;
         
         // Derived properties
         line_interpolation = 1 / PApplet.parseFloat(line_iterations);
@@ -371,7 +375,6 @@ class Creature {
         // Update the progress of the creature
         // noiseSeed(noise_seed);
         // noise_progress = noise_progress + .01;
-        updateNoise();
 
         // Sum up vectors
         v1.add(m1); c1.add(m2); h1.add(m3);
@@ -415,11 +418,13 @@ class Creature {
                 // Interpolate vectors for each iteration, multiply the interpolation factor
                 float p1x = bezierPoint(v1.x, c1.x, c2.x, v3.x, t);
                 float p1y = bezierPoint(v1.y, c1.y, c2.y, v3.y, t);
+
                 float h1x = bezierPoint(h1.x, c1.x, c2.x, h3.x, t);
                 float h1y = bezierPoint(h1.y, c1.y, c2.y, h3.y, t);
                 
                 float p2x = bezierPoint(v2.x, c3.x, c4.x, v4.x, t);
                 float p2y = bezierPoint(v2.y, c3.y, c4.y, v4.y, t);
+
                 float h2x = bezierPoint(h2.x, c3.x, c4.x, h4.x, t);
                 float h2y = bezierPoint(h2.y, c3.y, c4.y, h4.y, t);
                 
@@ -431,19 +436,26 @@ class Creature {
                     float point_position = map(j, 0, line_points - 1, 0, 1);
                     float x = bezierPoint(p1x, h1x, h2x, p2x, point_position);
                     float y = bezierPoint(p1y, h1y, h2y, p2y, point_position);
+
+                    // Noise rotate about position
+                    PVector pt = new PVector(x, y);
+                    PVector h = new PVector(noise_scale, 0);
+                    h.rotate(noise(x * noise_factor, y * noise_factor) * 2 * TWO_PI);
+
+                    PVector pOut = PVector.add(pt, h);
                     
-                    y += noisePlusMinus(line_noise_magnitude, i, j, 0.01f);
-                    y += noisePlusMinus(point_noise_magnitude, i, j, 1);
-                    x += noisePlusMinus(line_noise_magnitude, x, y, 0.01f);
-                    x += noisePlusMinus(point_noise_magnitude, x, y, 1);
 
                     if (debug_mode) {
                         noStroke();
-                        fill(128,128,128);
-                        circle(x, y, 10);
+                        fill(128,128,128, 40);
+                        circle(x, y, noise_scale*2);
+
+                        stroke(1);
+                        strokeWeight(1);
+                        line(pt.x, pt.y, pOut.x, pOut.y);
                     }
                     
-                    vertex(x, y);
+                    vertex(pOut.x, pOut.y);
                 }
 
                 stroke(1);
@@ -463,18 +475,6 @@ class Creature {
     public float noisePlusMinus(float amp, float x, float y, float f) {
         float n = amp * noise(y * f, x) - amp * 0.5f;
         return(n);
-    }
-
-    public void updateNoise() {
-        n1 = new PVector(noise(v1.x, v1.y), noise(h1.x, h1.y));
-        n2 = new PVector(noise(v2.x, v2.y), noise(h2.x, h2.y));
-        n3 = new PVector(noise(v3.x, v3.y), noise(h3.x, h3.y));
-        n4 = new PVector(noise(v4.x, v4.y), noise(h4.x, h4.y));
-
-        n1.mult(10);
-        n2.mult(10);
-        n3.mult(10);
-        n4.mult(10);
     }
     
     // Traces
