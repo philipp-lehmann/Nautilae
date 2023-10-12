@@ -143,16 +143,18 @@ class Creature {
                     float y = bezierPoint(pAy, hAy, hBy, pBy, point_position);
                     
                     // Noise rotate about position
+                    float n1 = noise(x * noise_factor, y * noise_factor);
+                    float n2 = noise((x + 999) * 10 * noise_factor, (y + 909) + 10 * noise_factor);
                     PVector pt = new PVector(x, y);
-                    PVector h = new PVector(noise_scale, 0);
-                    h.rotate(noise(x * noise_factor, y * noise_factor) * 2 * TWO_PI);
+                    PVector h = new PVector(noise_scale * n2, 0);
+                    h.rotate(n1 * 2 * TWO_PI);
                     
                     PVector pOut = PVector.add(pt, h);
                     
                     if (debug_mode) {
                         noStroke();
                         fill(_secondary3, 30);
-                        circle(x, y, noise_scale * 2);
+                        circle(x, y, h.mag() * 2);
                         
                         stroke(_output);
                         strokeWeight(1);

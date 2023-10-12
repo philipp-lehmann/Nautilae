@@ -47,7 +47,7 @@ void setup() {
     _bg1 = color(0, 0, 8);
     _bg2 = color(0, 0, 18);
     _bg3 = color(0, 0, 30);
-    _outputDisplay = color(180, 5, 230);
+    _outputDisplay = color(180, 5, 230, 80);
     _outputExport = color(0, 0, 0);
     _output = _outputDisplay;
     _primary1 = color(180, 80, 100);

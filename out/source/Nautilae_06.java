@@ -67,7 +67,7 @@ public void setup() {
     _bg1 = color(0, 0, 8);
     _bg2 = color(0, 0, 18);
     _bg3 = color(0, 0, 30);
-    _outputDisplay = color(180, 5, 230);
+    _outputDisplay = color(180, 5, 230, 80);
     _outputExport = color(0, 0, 0);
     _output = _outputDisplay;
     _primary1 = color(180, 80, 100);
@@ -174,7 +174,7 @@ Button button_generate, button_contain, button_record;
 public void setupControls() {
    toggle_debug = cp5.addToggle("setDebug")
        .setLabel("Debug mode")
-       .setValue(debug_mode)
+       .setValue(!debug_mode)
        .setPosition(20, height - 30)
        .setSize(40,10)
        .setMode(ControlP5.SWITCH)
@@ -194,8 +194,8 @@ public void setupControls() {
     slider_points = cp5.addSlider("setPointsPerLine")
        .setLabel("Points per line")
        .setValue(line_points)
-       .setRange(1,1000)
-       .setNumberOfTickMarks(1000)
+       .setRange(1,300)
+       .setNumberOfTickMarks(300)
        .showTickMarks(false)
        .setPosition(20,40)
        .setSize(200,10)
@@ -205,7 +205,7 @@ public void setupControls() {
     slider_noise_scale = cp5.addSlider("setNoiseScale")
        .setLabel("Noise scale")
        .setValue(noise_scale)
-       .setRange(0,25)
+       .setRange(0,50)
        .setPosition(20,80)
        .setSize(200,10)
        .setVisible(show_controls);
@@ -221,7 +221,7 @@ public void setupControls() {
     slider_noise_factor = cp5.addSlider("setNoiseFactor")
        .setLabel("Noise factor")
        .setValue(noise_factor)
-       .setRange(0.001f,0.1f)
+       .setRange(0.00001f,0.0001f)
        .setPosition(20,120)
        .setSize(200,10)
        .setVisible(show_controls);
@@ -229,7 +229,7 @@ public void setupControls() {
     toggle_vortex = cp5.addToggle("setVortex")
        .setLabel("Vortex")
        .setLabelVisible(false)
-       .setValue(vortex_effect)
+       .setValue(!vortex_effect)
        .setPosition(20,160)
        .setSize(60,10)
        .setMode(ControlP5.SWITCH)
@@ -238,7 +238,7 @@ public void setupControls() {
     toggle_flip = cp5.addToggle("flipVortext")
        .setLabel("flip")
        .setLabelVisible(false)
-       .setValue(vortex_effect)
+       .setValue(!vortex_effect)
        .setPosition(90,160)
        .setSize(60,10)
        .setMode(ControlP5.SWITCH)
@@ -320,6 +320,7 @@ public void toggleControls(boolean show_hide) {
     
     // Show and hide default controls
     button_generate.setVisible(show_controls);
+    button_contain.setVisible(show_controls);
     button_record.setVisible(show_controls);
     slider_output_iterations.setVisible(show_controls); 
     slider_points.setVisible(show_controls); 
@@ -337,8 +338,9 @@ public void toggleControls(boolean show_hide) {
 // Control event
 public void controlEvent(ControlEvent theControlEvent) {
     if (creature_one != null) {
-        vortex_effect = PApplet.parseBoolean(PApplet.parseInt(toggle_vortex.getValue()));
-        vortex_flip = PApplet.parseBoolean(PApplet.parseInt(toggle_flip.getValue()));
+        debug_mode = !PApplet.parseBoolean(PApplet.parseInt(toggle_debug.getValue()));
+        vortex_effect = !PApplet.parseBoolean(PApplet.parseInt(toggle_vortex.getValue()));
+        vortex_flip = !PApplet.parseBoolean(PApplet.parseInt(toggle_flip.getValue()));
         vortex_rotation = slider_vortex_rotation.getValue();
         vortex_scale = slider_vortex_scale.getValue();
         vortex_iterations = PApplet.parseInt(slider_vortex_iterations.getValue());
@@ -348,7 +350,6 @@ public void controlEvent(ControlEvent theControlEvent) {
         noise_scale = slider_noise_scale.getValue();
         noise_factor = slider_noise_factor.getValue();
         noiseDetail(8, noise_falloff);
-        debug_mode = PApplet.parseBoolean(PApplet.parseInt(toggle_debug.getValue()));
         creature_one.line_iterations = line_iterations;
         creature_one.line_points = line_points;
 }
@@ -509,16 +510,19 @@ class Creature {
                     float y = bezierPoint(pAy, hAy, hBy, pBy, point_position);
                     
                     // Noise rotate about position
+                    float n1 = noise(x * noise_factor, y * noise_factor);
+                    float n2 = noise((x + 999) * 10 * noise_factor, (y + 909) + 10 * noise_factor);
+                    println(n2);
                     PVector pt = new PVector(x, y);
-                    PVector h = new PVector(noise_scale, 0);
-                    h.rotate(noise(x * noise_factor, y * noise_factor) * 2 * TWO_PI);
+                    PVector h = new PVector(noise_scale * n2, 0);
+                    h.rotate(n1 * 2 * TWO_PI);
                     
                     PVector pOut = PVector.add(pt, h);
                     
                     if (debug_mode) {
                         noStroke();
                         fill(_secondary3, 30);
-                        circle(x, y, noise_scale * 2);
+                        circle(x, y, h.mag() * 2);
                         
                         stroke(_output);
                         strokeWeight(1);
