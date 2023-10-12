@@ -10,24 +10,31 @@ boolean record = false;
 // Vectors
 PVector vs1, vs2, ve1, ve2, hs1, hs2, he1, he2;
 
+
+// Colors
+color _bg1, _bg2, _bg3, _output, _primary1, _primary2, _primary3, _secondary1, _secondary2, _secondary3, _debug;
+
+
 // Creatures
 Creature creature_one; 
 
 // Sketch Parameters
 PImage vortex_img;
 boolean vortex_effect = false;
-int vortex_iterations = 5;
 int sketch_size = 600;
 int border = 75;
 int double_border = 2 * border;
 
 // Creature Default Properties
-float vortex_rotation = 5.0;
 float moving_speed = 1.0;
-int line_iterations = 10;
-int line_points = 20;
+int line_iterations = 20;
+int line_points = 40;
+
+int vortex_iterations = 5;
+float vortex_rotation = 5.0;
+
+float noise_scale = 0.0;
 float noise_falloff = 0.8;
-float noise_scale = 15.0;
 float noise_factor = 0.02;
 
 void setup() {
@@ -37,8 +44,23 @@ void setup() {
     strokeCap(ROUND);
     strokeJoin(ROUND);
     ellipseMode(CENTER);
+    textAlign(CENTER);
+    colorMode(HSB, 360, 100, 100);
     noiseSeed(100);
     noiseDetail(8, noise_falloff);
+
+    // Theme
+    _bg1 = color(0, 0, 8);
+    _bg2 = color(0, 0, 18);
+    _bg3 = color(0, 0, 30);
+    _output = color(180, 5, 250);
+    _primary1 = color(180, 80, 100);
+    _primary2 = color(180, 80, 80);
+    _primary3 = color(180, 80, 60);
+    _secondary1 = color(100, 80, 100);
+    _secondary2 = color(100, 80, 80);
+    _secondary3 = color(100, 80, 60);
+    _debug = color(0, 100, 100);
 
     // Create the controls
     cp5 = new ControlP5(this);
@@ -50,7 +72,7 @@ void setup() {
 }
     
 void draw() {
-    background(255);
+    background(_bg1);
 
     // Start recording
     if (record) {
@@ -120,7 +142,7 @@ boolean show_handles() {
     if (!(mouseX == pmouseX && mouseY == pmouseY)) {
         mouse_timeout = millis();
     };
-    if (mouse_timeout > millis() - 400) {
+    if (mouse_timeout > millis() - 400 && show_controls) {
         sh = true;
     }    
     return sh;

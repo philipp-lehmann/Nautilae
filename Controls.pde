@@ -1,17 +1,18 @@
 // Controls
 ControlP5 cp5;
-Slider slider_line_iterations, slider_points, slider_vortex_rotation, slider_vortex_iterations, slider_noise_scale, slider_noise_factor, slider_noise_falloff;
+Slider slider_output_iterations, slider_points, slider_vortex_rotation, slider_vortex_iterations, slider_noise_scale, slider_noise_factor, slider_noise_falloff;
 Toggle toggle_vortex, toggle_debug;
 Button button_generate, button_record;
 
 
 void setupControls() {
     // Slider for the number of iterations between the vectors
-    slider_line_iterations = cp5.addSlider("setLineIterations")
+    slider_output_iterations = cp5.addSlider("setLineIterations")
        .setLabel("Line iterations")
        .setValue(line_iterations)
        .setRange(1,30)
        .setNumberOfTickMarks(30)
+       .showTickMarks(false)
        .setPosition(20,20)
        .setSize(200,10)
        .setVisible(show_controls)
@@ -23,7 +24,8 @@ void setupControls() {
        .setValue(line_points)
        .setRange(2,1000)
        .setNumberOfTickMarks(999)
-       .setPosition(20,60)
+       .showTickMarks(false)
+       .setPosition(20,40)
        .setSize(200,10)
        .setVisible(show_controls)
        ;
@@ -33,7 +35,7 @@ void setupControls() {
        .setLabel("Vortex")
        .setValue(vortex_effect)
        .setPosition(20,80)
-       .setSize(90,10)
+       .setSize(60,10)
        .setMode(ControlP5.SWITCH)
        .setVisible(show_controls);
        
@@ -49,7 +51,7 @@ void setupControls() {
     slider_vortex_rotation = cp5.addSlider("setVortexRotation")
        .setLabel("Vortex Rotation")
        .setValue(vortex_rotation)
-       .setRange(0,360)
+       .setRange(-180,180)
        .setPosition(20,100)
        .setSize(200,10)
        .setVisible(show_controls);
@@ -68,7 +70,7 @@ void setupControls() {
        .setLabel("Noise scale")
        .setValue(noise_scale)
        .setRange(0,25)
-       .setPosition(20,200)
+       .setPosition(20,160)
        .setSize(200,10)
        .setVisible(show_controls);
     
@@ -77,7 +79,7 @@ void setupControls() {
        .setLabel("Noise falloff")
        .setValue(noise_falloff)
        .setRange(0,1)
-       .setPosition(20,220)
+       .setPosition(20,180)
        .setSize(200,10)
        .setVisible(show_controls);
     
@@ -86,7 +88,7 @@ void setupControls() {
        .setLabel("Noise factor")
        .setValue(noise_factor)
        .setRange(0.001,0.1)
-       .setPosition(20,240)
+       .setPosition(20,200)
        .setSize(200,10)
        .setVisible(show_controls);
     
@@ -103,15 +105,16 @@ void setupControls() {
         	.setSize(60, 20);
 
 
-    setGlobalForegroundColor(color(0, 50, 240), color(0, 60, 255));
+    setGlobalForegroundColor();
 }
 
 // Update theme
-void setGlobalForegroundColor(int c1, int c2) {
+void setGlobalForegroundColor() {
     for (ControllerInterface <? > controller : cp5.getAll()) {
         if (controller instanceof Controller) {
-           ((Controller<?>) controller).setColorForeground(c1);
-           ((Controller<?>) controller).setColorActive(c2);
+           ((Controller<?>) controller).setColorBackground(_bg3);
+           ((Controller<?>) controller).setColorForeground(_primary1);
+           ((Controller<?>) controller).setColorActive(_primary2);
         }
 }
 }
@@ -137,7 +140,7 @@ void toggleControls(boolean show_hide) {
     // Show and hide default controls
     button_generate.setVisible(show_controls);
     button_record.setVisible(show_controls);
-    slider_line_iterations.setVisible(show_controls); 
+    slider_output_iterations.setVisible(show_controls); 
     slider_points.setVisible(show_controls); 
     slider_vortex_rotation.setVisible(show_controls); 
     slider_vortex_iterations.setVisible(show_controls); 
@@ -154,14 +157,12 @@ void controlEvent(ControlEvent theControlEvent) {
         vortex_effect = boolean(int(toggle_vortex.getValue()));
         vortex_rotation = slider_vortex_rotation.getValue();
         vortex_iterations = int(slider_vortex_iterations.getValue());
-        line_iterations = int(slider_line_iterations.getValue());
+        line_iterations = int(slider_output_iterations.getValue());
         line_points = int(slider_points.getValue());
         noise_falloff = slider_noise_falloff.getValue();
         noise_scale = slider_noise_scale.getValue();
         noise_factor = slider_noise_factor.getValue();
         noiseDetail(8, noise_falloff);
-        
-        println("print: " + toggle_debug.getValue() + " . " + debug_mode);
         debug_mode = boolean(int(toggle_debug.getValue()));
         creature_one.line_iterations = line_iterations;
         creature_one.line_points = line_points;

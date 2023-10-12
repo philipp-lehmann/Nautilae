@@ -30,24 +30,31 @@ boolean record = false;
 // Vectors
 PVector vs1, vs2, ve1, ve2, hs1, hs2, he1, he2;
 
+
+// Colors
+int _bg1, _bg2, _bg3, _output, _primary1, _primary2, _primary3, _secondary1, _secondary2, _secondary3, _debug;
+
+
 // Creatures
 Creature creature_one; 
 
 // Sketch Parameters
 PImage vortex_img;
 boolean vortex_effect = false;
-int vortex_iterations = 5;
 int sketch_size = 600;
 int border = 75;
 int double_border = 2 * border;
 
 // Creature Default Properties
-float vortex_rotation = 5.0f;
 float moving_speed = 1.0f;
-int line_iterations = 10;
-int line_points = 20;
+int line_iterations = 20;
+int line_points = 40;
+
+int vortex_iterations = 5;
+float vortex_rotation = 5.0f;
+
+float noise_scale = 0.0f;
 float noise_falloff = 0.8f;
-float noise_scale = 15.0f;
 float noise_factor = 0.02f;
 
 public void setup() {
@@ -57,8 +64,23 @@ public void setup() {
     strokeCap(ROUND);
     strokeJoin(ROUND);
     ellipseMode(CENTER);
+    textAlign(CENTER);
+    colorMode(HSB, 360, 100, 100);
     noiseSeed(100);
     noiseDetail(8, noise_falloff);
+
+    // Theme
+    _bg1 = color(0, 0, 8);
+    _bg2 = color(0, 0, 18);
+    _bg3 = color(0, 0, 30);
+    _output = color(180, 5, 250);
+    _primary1 = color(180, 80, 100);
+    _primary2 = color(180, 80, 80);
+    _primary3 = color(180, 80, 60);
+    _secondary1 = color(100, 80, 100);
+    _secondary2 = color(100, 80, 80);
+    _secondary3 = color(100, 80, 60);
+    _debug = color(0, 100, 100);
 
     // Create the controls
     cp5 = new ControlP5(this);
@@ -70,7 +92,7 @@ public void setup() {
 }
     
 public void draw() {
-    background(255);
+    background(_bg1);
 
     // Start recording
     if (record) {
@@ -140,25 +162,26 @@ public boolean show_handles() {
     if (!(mouseX == pmouseX && mouseY == pmouseY)) {
         mouse_timeout = millis();
     };
-    if (mouse_timeout > millis() - 400) {
+    if (mouse_timeout > millis() - 400 && show_controls) {
         sh = true;
     }    
     return sh;
 }
 // Controls
 ControlP5 cp5;
-Slider slider_line_iterations, slider_points, slider_vortex_rotation, slider_vortex_iterations, slider_noise_scale, slider_noise_factor, slider_noise_falloff;
+Slider slider_output_iterations, slider_points, slider_vortex_rotation, slider_vortex_iterations, slider_noise_scale, slider_noise_factor, slider_noise_falloff;
 Toggle toggle_vortex, toggle_debug;
 Button button_generate, button_record;
 
 
 public void setupControls() {
     // Slider for the number of iterations between the vectors
-    slider_line_iterations = cp5.addSlider("setLineIterations")
+    slider_output_iterations = cp5.addSlider("setLineIterations")
        .setLabel("Line iterations")
        .setValue(line_iterations)
        .setRange(1,30)
        .setNumberOfTickMarks(30)
+       .showTickMarks(false)
        .setPosition(20,20)
        .setSize(200,10)
        .setVisible(show_controls)
@@ -170,7 +193,8 @@ public void setupControls() {
        .setValue(line_points)
        .setRange(2,1000)
        .setNumberOfTickMarks(999)
-       .setPosition(20,60)
+       .showTickMarks(false)
+       .setPosition(20,40)
        .setSize(200,10)
        .setVisible(show_controls)
        ;
@@ -180,7 +204,7 @@ public void setupControls() {
        .setLabel("Vortex")
        .setValue(vortex_effect)
        .setPosition(20,80)
-       .setSize(90,10)
+       .setSize(60,10)
        .setMode(ControlP5.SWITCH)
        .setVisible(show_controls);
        
@@ -196,7 +220,7 @@ public void setupControls() {
     slider_vortex_rotation = cp5.addSlider("setVortexRotation")
        .setLabel("Vortex Rotation")
        .setValue(vortex_rotation)
-       .setRange(0,360)
+       .setRange(-180,180)
        .setPosition(20,100)
        .setSize(200,10)
        .setVisible(show_controls);
@@ -215,7 +239,7 @@ public void setupControls() {
        .setLabel("Noise scale")
        .setValue(noise_scale)
        .setRange(0,25)
-       .setPosition(20,200)
+       .setPosition(20,160)
        .setSize(200,10)
        .setVisible(show_controls);
     
@@ -224,7 +248,7 @@ public void setupControls() {
        .setLabel("Noise falloff")
        .setValue(noise_falloff)
        .setRange(0,1)
-       .setPosition(20,220)
+       .setPosition(20,180)
        .setSize(200,10)
        .setVisible(show_controls);
     
@@ -250,15 +274,16 @@ public void setupControls() {
         	.setSize(60, 20);
 
 
-    setGlobalForegroundColor(color(0, 50, 240), color(0, 60, 255));
+    setGlobalForegroundColor();
 }
 
 // Update theme
-public void setGlobalForegroundColor(int c1, int c2) {
+public void setGlobalForegroundColor() {
     for (ControllerInterface <? > controller : cp5.getAll()) {
         if (controller instanceof Controller) {
-           ((Controller<?>) controller).setColorForeground(c1);
-           ((Controller<?>) controller).setColorActive(c2);
+           ((Controller<?>) controller).setColorBackground(_bg3);
+           ((Controller<?>) controller).setColorForeground(_primary1);
+           ((Controller<?>) controller).setColorActive(_primary2);
         }
 }
 }
@@ -284,7 +309,7 @@ public void toggleControls(boolean show_hide) {
     // Show and hide default controls
     button_generate.setVisible(show_controls);
     button_record.setVisible(show_controls);
-    slider_line_iterations.setVisible(show_controls); 
+    slider_output_iterations.setVisible(show_controls); 
     slider_points.setVisible(show_controls); 
     slider_vortex_rotation.setVisible(show_controls); 
     slider_vortex_iterations.setVisible(show_controls); 
@@ -301,7 +326,7 @@ public void controlEvent(ControlEvent theControlEvent) {
         vortex_effect = PApplet.parseBoolean(PApplet.parseInt(toggle_vortex.getValue()));
         vortex_rotation = slider_vortex_rotation.getValue();
         vortex_iterations = PApplet.parseInt(slider_vortex_iterations.getValue());
-        line_iterations = PApplet.parseInt(slider_line_iterations.getValue());
+        line_iterations = PApplet.parseInt(slider_output_iterations.getValue());
         line_points = PApplet.parseInt(slider_points.getValue());
         noise_falloff = slider_noise_falloff.getValue();
         noise_scale = slider_noise_scale.getValue();
@@ -342,7 +367,7 @@ class Creature {
     float moving_speed = 5.0f;
     float decrease_rate = 0.98f;
     int noise_seed = 1;
-
+    
     // Appearance
     int handle_size = 15;
     
@@ -379,20 +404,21 @@ class Creature {
         c4 = randomPos();
         
         if (debug_mode) {
-            v1 = new PVector( -200, -200);
-            v3 = new PVector(200, -200);
-            v2 = new PVector( -200,200);
-            v4 = new PVector(200,200);
+            h1 = new PVector( - 250, -100);
+            v1 = new PVector( - 200, -200);
+            c1 = new PVector( - 100, -300);
             
-            h1 = new PVector( -100, -300);
-            h3 = new PVector(100, -300);
-            h2 = new PVector( -100,300);
-            h4 = new PVector(100,300);
+            c2 = new PVector( - 100,  300);
+            v2 = new PVector( - 200,  200);
+            h2 = new PVector( - 250,  100);
             
-            c1 = new PVector( -100, -100);
-            c2 = new PVector(100, -100);
-            c3 = new PVector( -100,100);
-            c4 = new PVector(100,100);
+            h3 = new PVector(250,  100);
+            v3 = new PVector(200,  200);
+            c3 = new PVector(100,  300);
+            
+            c4 = new PVector(100, -300);
+            v4 = new PVector(200, -200);
+            h4 = new PVector(250, -100);
         }
         
         // Set random movement vectors
@@ -420,10 +446,10 @@ class Creature {
     
     // Draw creature
     public void draw() {
-
+        
         pushMatrix();
         translate(width * 0.5f, height * 0.5f);
-
+        
         // Vortex settings
         int numVortex = vortex_effect ? vortex_iterations : 1;
         
@@ -435,26 +461,28 @@ class Creature {
                 float t = map(i, 0, line_iterations - 1, 0, 1);
                 
                 // Interpolate vectors for each iteration, multiply the interpolation factor
-                float p1x = bezierPoint(v1.x, c1.x, c2.x, v3.x, t);
-                float p1y = bezierPoint(v1.y, c1.y, c2.y, v3.y, t);
+                float pAx = bezierPoint(v1.x, c1.x, c4.x, v4.x, t);
+                float pAy = bezierPoint(v1.y, c1.y, c4.y, v4.y, t);
                 
-                float h1x = bezierPoint(h1.x, c1.x, c2.x, h3.x, t);
-                float h1y = bezierPoint(h1.y, c1.y, c2.y, h3.y, t);
+                float pBx = bezierPoint(v2.x, c2.x, c3.x, v3.x, t);
+                float pBy = bezierPoint(v2.y, c2.y, c3.y, v3.y, t);
                 
-                float p2x = bezierPoint(v2.x, c3.x, c4.x, v4.x, t);
-                float p2y = bezierPoint(v2.y, c3.y, c4.y, v4.y, t);
+                float hAx = bezierPoint(v1.x, h1.x, h4.x, v4.x, t);
+                float hAy = bezierPoint(v1.y, h1.y, h4.y, v4.y, t);
                 
-                float h2x = bezierPoint(h2.x, c3.x, c4.x, h4.x, t);
-                float h2y = bezierPoint(h2.y, c3.y, c4.y, h4.y, t);
+                float hBx = bezierPoint(h2.x, v2.x, v3.x, h3.x, t);
+                float hBy = bezierPoint(h2.y, v2.y, v3.y, h3.y, t);
+               
                 
                 // Draw line as circles with different sizes
+                stroke(_output);
                 beginShape();
                 
                 for (int j = 0; j <= line_points; j++) {
                     // Interpolate circle size for each point
-                    float point_position = map(j, 0, line_points - 1, 0, 1);
-                    float x = bezierPoint(p1x, h1x, h2x, p2x, point_position);
-                    float y = bezierPoint(p1y, h1y, h2y, p2y, point_position);
+                    float point_position = map(j, 0, line_points, 0, 1);
+                    float x = bezierPoint(pAx, hAx, hBx, pBx, point_position);
+                    float y = bezierPoint(pAy, hAy, hBy, pBy, point_position);
                     
                     // Noise rotate about position
                     PVector pt = new PVector(x, y);
@@ -465,10 +493,10 @@ class Creature {
                     
                     if (debug_mode) {
                         noStroke();
-                        fill(128,128,128, 40);
+                        fill(_secondary3, 30);
                         circle(x, y, noise_scale * 2);
                         
-                        stroke(1);
+                        stroke(_output);
                         strokeWeight(1);
                         line(pt.x, pt.y, pOut.x, pOut.y);
                     }
@@ -476,7 +504,7 @@ class Creature {
                     vertex(pOut.x, pOut.y);
                 }
                 
-                stroke(1);
+                stroke(_output);
                 strokeWeight(stroke_weight);
                 noFill();
                 
@@ -486,68 +514,82 @@ class Creature {
             rotate(radians(vortex_rotation));
             scale(1 - ((float) a / vortex_iterations * 0.5f));
         }
-
+        
         popMatrix();
-
+        
     }
     
     public void drawHandles() {
         if (debug_mode || show_handles()) {
             pushMatrix();
             translate(width * 0.5f, height * 0.5f);
-
+            
             // Handles
             noStroke();
-            fill(255,0,0);
+            fill(_primary1);
             circle(v1.x, v1.y, handle_size);
-            circle(v3.x, v3.y, handle_size);
+            text("V1", v1.x, v1.y + 20);
             circle(v2.x, v2.y, handle_size);
-            circle(v4.x, v4.y, handle_size);
-            
-            fill(0,255,0);
+            text("V2", v2.x, v2.y + 20);
             circle(h1.x, h1.y, handle_size);
+            text("H1", h1.x, h1.y + 20);
             circle(h2.x, h2.y, handle_size);
-            circle(h3.x, h3.y, handle_size);
-            circle(h4.x, h4.y, handle_size);
-            
-            fill(0,0,255);
+            text("H2", h2.x, h2.y + 20);
             circle(c1.x, c1.y, handle_size);
+            text("C1", c1.x, c1.y + 20);
             circle(c2.x, c2.y, handle_size);
+            text("C2", c2.x, c2.y + 20);
+            
+            fill(_secondary1);
+            circle(v3.x, v3.y, handle_size);
+            text("V3", v3.x, v3.y + 20);
+            circle(v4.x, v4.y, handle_size);
+            text("V4", v4.x, v4.y + 20);
+            circle(h3.x, h3.y, handle_size);
+            text("H3", h3.x, h3.y + 20);
+            circle(h4.x, h4.y, handle_size);
+            text("H4", h4.x, h4.y + 20);
             circle(c3.x, c3.y, handle_size);
+            text("C3", c3.x, c3.y + 20);
             circle(c4.x, c4.y, handle_size);
+            text("C4", c4.x, c4.y + 20);
             
             noFill();
             strokeWeight(1);
-            stroke(255,0,0);
+            
             
             // Bezier Lines
+            stroke(_primary3);
             line(v1.x, v1.y, h1.x, h1.y);
             line(h1.x, h1.y, h2.x, h2.y);
             line(h2.x, h2.y, v2.x, v2.y);
             
+            stroke(_secondary3);
             line(v3.x, v3.y, h3.x, h3.y);
             line(h3.x, h3.y, h4.x, h4.y);
             line(h4.x, h4.y, v4.x, v4.y);
             
             // Distort controls
-            stroke(0,0,255);
+            stroke(_primary2);
             line(v1.x, v1.y, c1.x, c1.y);
-            line(v3.x, v3.y, c2.x, c2.y);
-            line(v2.x, v2.y, c3.x, c3.y);
+            line(v2.x, v2.y, c2.x, c2.y);
+            
+            stroke(_secondary3);
+            line(v3.x, v3.y, c3.x, c3.y);
             line(v4.x, v4.y, c4.x, c4.y);
-
+            
             popMatrix();
         }
     }
     
-
+    
     public void checkSelection() {
         PVector m = new PVector(mouseX - width / 2, mouseY - height / 2);
         
-        if (mousePressed == false ) {
+        if (mousePressed == false) {
             selected_vector = null;
         }
-
+        
         if (selected_vector == null) {
             // Check for mouse hvoer
             pushMatrix();
@@ -571,7 +613,7 @@ class Creature {
             }
         }
     }
-
+    
     
     public void assignVectorArray() {
         vectors[0] = v1;
