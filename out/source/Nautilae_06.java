@@ -21,18 +21,10 @@ public class Nautilae_06 extends PApplet {
 
 
 
-
-boolean debug_mode = true;
-boolean show_handles = true;
-
-// Controls
-ControlP5 cp5;
-Slider slider_line_iterations, slider_points, slider_vortex_rotation, slider_vortex_iterations, slider_noise_scale, slider_noise_factor, slider_noise_falloff;
-Toggle toggle_vortex, toggle_debug;
-Button button_generate, button_record;
-
-// Interface status
+// UI status
+boolean debug_mode = false;
 boolean show_controls = true;
+int mouse_timeout = 0;
 boolean record = false;
 
 // Vectors
@@ -105,6 +97,8 @@ public void draw() {
     cp5.draw();
 }
 
+
+
 public void keyPressed() {
     // Recreate creature
     if (key == 'r' || key == 'R') {
@@ -140,6 +134,24 @@ public String dateString() {
     String dateString = year() + "-" + nf(month(), 2) + "-" + nf(day(), 2)+ "-" + nf(hour(), 2) + nf(minute(), 2) + nf(second(), 2);
     return dateString;
 }
+
+public boolean show_handles() {
+    boolean sh = false;
+    if (!(mouseX == pmouseX && mouseY == pmouseY)) {
+        mouse_timeout = millis();
+    };
+    if (mouse_timeout > millis() - 400) {
+        sh = true;
+    }    
+    return sh;
+}
+// Controls
+ControlP5 cp5;
+Slider slider_line_iterations, slider_points, slider_vortex_rotation, slider_vortex_iterations, slider_noise_scale, slider_noise_factor, slider_noise_falloff;
+Toggle toggle_vortex, toggle_debug;
+Button button_generate, button_record;
+
+
 public void setupControls() {
     // Slider for the number of iterations between the vectors
     slider_line_iterations = cp5.addSlider("setLineIterations")
@@ -169,21 +181,22 @@ public void setupControls() {
        .setValue(vortex_effect)
        .setPosition(20,80)
        .setSize(90,10)
+       .setMode(ControlP5.SWITCH)
        .setVisible(show_controls);
-    
-    // Toggle for the vortex effect
+       
     toggle_debug = cp5.addToggle("setDebug")
-       .setLabel("Debug")
+       .setLabel("Debug mode")
        .setValue(debug_mode)
-       .setPosition(120,80)
-       .setSize(90,10)
+       .setPosition(20, height - 30)
+       .setSize(40,10)
+       .setMode(ControlP5.SWITCH)
        .setVisible(show_controls);
     
     // Slider to adjust the rotation of each vortex iteration
     slider_vortex_rotation = cp5.addSlider("setVortexRotation")
        .setLabel("Vortex Rotation")
        .setValue(vortex_rotation)
-       .setRange(0,90)
+       .setRange(0,360)
        .setPosition(20,100)
        .setSize(200,10)
        .setVisible(show_controls);
@@ -196,7 +209,7 @@ public void setupControls() {
        .setPosition(20,120)
        .setSize(200,10)
        .setVisible(show_controls);
-
+    
     // Slider to adjust the noise falloff for the details
     slider_noise_scale = cp5.addSlider("setNoiseScale")
        .setLabel("Noise scale")
@@ -205,7 +218,7 @@ public void setupControls() {
        .setPosition(20,200)
        .setSize(200,10)
        .setVisible(show_controls);
-
+    
     // Slider to adjust the noise offset radius
     slider_noise_falloff = cp5.addSlider("setNoiseFalloff")
        .setLabel("Noise falloff")
@@ -214,7 +227,7 @@ public void setupControls() {
        .setPosition(20,220)
        .setSize(200,10)
        .setVisible(show_controls);
-
+    
     // Slider to adjust the noise detail level
     slider_noise_factor = cp5.addSlider("setNoiseFactor")
        .setLabel("Noise factor")
@@ -235,6 +248,19 @@ public void setupControls() {
     button_record = cp5.addButton("saveSVG")
         	.setPosition(width - 80,80)
         	.setSize(60, 20);
+
+
+    setGlobalForegroundColor(color(0, 50, 240), color(0, 60, 255));
+}
+
+// Update theme
+public void setGlobalForegroundColor(int c1, int c2) {
+    for (ControllerInterface <? > controller : cp5.getAll()) {
+        if (controller instanceof Controller) {
+           ((Controller<?>) controller).setColorForeground(c1);
+           ((Controller<?>) controller).setColorActive(c2);
+        }
+}
 }
 
 // Toggle Controls
@@ -242,14 +268,16 @@ public void showControls() {
     hideControls();
     toggleControls(true);
 }
+
 public void hideControls() {
     toggleControls(false);
 }
+
 public void toggleControls() {
     show_controls = !show_controls;
-    show_handles = show_controls;
     toggleControls(show_controls);
 }
+
 public void toggleControls(boolean show_hide) {
     show_controls = show_hide;
     
@@ -269,40 +297,25 @@ public void toggleControls(boolean show_hide) {
 
 // Control event
 public void controlEvent(ControlEvent theControlEvent) {
-   if (creature_one != null) {
-      updateControlValues();
-      creature_one.line_iterations = line_iterations;
-      creature_one.line_points = line_points;
-   }
+    if (creature_one != null) {
+        vortex_effect = PApplet.parseBoolean(PApplet.parseInt(toggle_vortex.getValue()));
+        vortex_rotation = slider_vortex_rotation.getValue();
+        vortex_iterations = PApplet.parseInt(slider_vortex_iterations.getValue());
+        line_iterations = PApplet.parseInt(slider_line_iterations.getValue());
+        line_points = PApplet.parseInt(slider_points.getValue());
+        noise_falloff = slider_noise_falloff.getValue();
+        noise_scale = slider_noise_scale.getValue();
+        noise_factor = slider_noise_factor.getValue();
+        noiseDetail(8, noise_falloff);
+        
+        println("print: " + toggle_debug.getValue() + " . " + debug_mode);
+        debug_mode = PApplet.parseBoolean(PApplet.parseInt(toggle_debug.getValue()));
+        creature_one.line_iterations = line_iterations;
+        creature_one.line_points = line_points;
+}
 }
 
-// Update parameters 
-public void updateControlValues() {
-    vortex_effect = PApplet.parseBoolean(PApplet.parseInt(toggle_vortex.getValue()));
-    debug_mode = PApplet.parseBoolean(PApplet.parseInt(toggle_debug.getValue()));
-    vortex_rotation = slider_vortex_rotation.getValue();
-    vortex_iterations = PApplet.parseInt(slider_vortex_iterations.getValue());
-    line_iterations = PApplet.parseInt(slider_line_iterations.getValue());
-    line_points = PApplet.parseInt(slider_points.getValue());
-    noise_falloff = slider_noise_falloff.getValue();
-    noise_scale = slider_noise_scale.getValue();
-    noise_factor = slider_noise_factor.getValue();
-    noiseDetail(8, noise_falloff);
-}
-
-// Update parameters 
-public void resetControls() {
-    toggle_vortex.setValue(0);
-    slider_vortex_rotation.setValue(0.0f);
-    slider_vortex_iterations.setValue(0.0f);
-    slider_speed.setValue(0);
-    slider_line_iterations.setValue(1);
-    slider_points.setValue(400);
-    hideControls();
-    createCreature();
-}
-
-
+// Save SVG
 public void saveSVG() {
     record = true;
 }
@@ -479,7 +492,7 @@ class Creature {
     }
     
     public void drawHandles() {
-        if (show_handles) {
+        if (debug_mode || show_handles()) {
             pushMatrix();
             translate(width * 0.5f, height * 0.5f);
 

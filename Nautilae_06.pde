@@ -1,18 +1,10 @@
 import processing.svg.*;
 import controlP5.*;
 
-
-boolean debug_mode = true;
-boolean show_handles = true;
-
-// Controls
-ControlP5 cp5;
-Slider slider_line_iterations, slider_points, slider_vortex_rotation, slider_vortex_iterations, slider_noise_scale, slider_noise_factor, slider_noise_falloff;
-Toggle toggle_vortex, toggle_debug;
-Button button_generate, button_record;
-
-// Interface status
+// UI status
+boolean debug_mode = false;
 boolean show_controls = true;
+int mouse_timeout = 0;
 boolean record = false;
 
 // Vectors
@@ -85,6 +77,8 @@ void draw() {
     cp5.draw();
 }
 
+
+
 void keyPressed() {
     // Recreate creature
     if (key == 'r' || key == 'R') {
@@ -119,4 +113,15 @@ PVector randomPos() {
 String dateString() {
     String dateString = year() + "-" + nf(month(), 2) + "-" + nf(day(), 2)+ "-" + nf(hour(), 2) + nf(minute(), 2) + nf(second(), 2);
     return dateString;
+}
+
+boolean show_handles() {
+    boolean sh = false;
+    if (!(mouseX == pmouseX && mouseY == pmouseY)) {
+        mouse_timeout = millis();
+    };
+    if (mouse_timeout > millis() - 400) {
+        sh = true;
+    }    
+    return sh;
 }

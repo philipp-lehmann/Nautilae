@@ -171,7 +171,7 @@ class Creature {
     }
     
     void drawHandles() {
-        if (show_handles) {
+        if (debug_mode || show_handles()) {
             pushMatrix();
             translate(width * 0.5, height * 0.5);
 

@@ -1,3 +1,10 @@
+// Controls
+ControlP5 cp5;
+Slider slider_line_iterations, slider_points, slider_vortex_rotation, slider_vortex_iterations, slider_noise_scale, slider_noise_factor, slider_noise_falloff;
+Toggle toggle_vortex, toggle_debug;
+Button button_generate, button_record;
+
+
 void setupControls() {
     // Slider for the number of iterations between the vectors
     slider_line_iterations = cp5.addSlider("setLineIterations")
@@ -27,21 +34,22 @@ void setupControls() {
        .setValue(vortex_effect)
        .setPosition(20,80)
        .setSize(90,10)
+       .setMode(ControlP5.SWITCH)
        .setVisible(show_controls);
-    
-    // Toggle for the vortex effect
+       
     toggle_debug = cp5.addToggle("setDebug")
-       .setLabel("Debug")
+       .setLabel("Debug mode")
        .setValue(debug_mode)
-       .setPosition(120,80)
-       .setSize(90,10)
+       .setPosition(20, height - 30)
+       .setSize(40,10)
+       .setMode(ControlP5.SWITCH)
        .setVisible(show_controls);
     
     // Slider to adjust the rotation of each vortex iteration
     slider_vortex_rotation = cp5.addSlider("setVortexRotation")
        .setLabel("Vortex Rotation")
        .setValue(vortex_rotation)
-       .setRange(0,90)
+       .setRange(0,360)
        .setPosition(20,100)
        .setSize(200,10)
        .setVisible(show_controls);
@@ -54,7 +62,7 @@ void setupControls() {
        .setPosition(20,120)
        .setSize(200,10)
        .setVisible(show_controls);
-
+    
     // Slider to adjust the noise falloff for the details
     slider_noise_scale = cp5.addSlider("setNoiseScale")
        .setLabel("Noise scale")
@@ -63,7 +71,7 @@ void setupControls() {
        .setPosition(20,200)
        .setSize(200,10)
        .setVisible(show_controls);
-
+    
     // Slider to adjust the noise offset radius
     slider_noise_falloff = cp5.addSlider("setNoiseFalloff")
        .setLabel("Noise falloff")
@@ -72,7 +80,7 @@ void setupControls() {
        .setPosition(20,220)
        .setSize(200,10)
        .setVisible(show_controls);
-
+    
     // Slider to adjust the noise detail level
     slider_noise_factor = cp5.addSlider("setNoiseFactor")
        .setLabel("Noise factor")
@@ -93,6 +101,19 @@ void setupControls() {
     button_record = cp5.addButton("saveSVG")
         	.setPosition(width - 80,80)
         	.setSize(60, 20);
+
+
+    setGlobalForegroundColor(color(0, 50, 240), color(0, 60, 255));
+}
+
+// Update theme
+void setGlobalForegroundColor(int c1, int c2) {
+    for (ControllerInterface <? > controller : cp5.getAll()) {
+        if (controller instanceof Controller) {
+           ((Controller<?>) controller).setColorForeground(c1);
+           ((Controller<?>) controller).setColorActive(c2);
+        }
+}
 }
 
 // Toggle Controls
@@ -107,7 +128,6 @@ void hideControls() {
 
 void toggleControls() {
     show_controls = !show_controls;
-    show_handles = show_controls;
     toggleControls(show_controls);
 }
 
@@ -130,25 +150,22 @@ void toggleControls(boolean show_hide) {
 
 // Control event
 void controlEvent(ControlEvent theControlEvent) {
-   if (creature_one != null) {
-      updateControlValues();
-      creature_one.line_iterations = line_iterations;
-      creature_one.line_points = line_points;
-   }
+    if (creature_one != null) {
+        vortex_effect = boolean(int(toggle_vortex.getValue()));
+        vortex_rotation = slider_vortex_rotation.getValue();
+        vortex_iterations = int(slider_vortex_iterations.getValue());
+        line_iterations = int(slider_line_iterations.getValue());
+        line_points = int(slider_points.getValue());
+        noise_falloff = slider_noise_falloff.getValue();
+        noise_scale = slider_noise_scale.getValue();
+        noise_factor = slider_noise_factor.getValue();
+        noiseDetail(8, noise_falloff);
+        
+        println("print: " + toggle_debug.getValue() + " . " + debug_mode);
+        debug_mode = boolean(int(toggle_debug.getValue()));
+        creature_one.line_iterations = line_iterations;
+        creature_one.line_points = line_points;
 }
-
-// Update parameters 
-void updateControlValues() {
-    vortex_effect = boolean(int(toggle_vortex.getValue()));
-    debug_mode = boolean(int(toggle_debug.getValue()));
-    vortex_rotation = slider_vortex_rotation.getValue();
-    vortex_iterations = int(slider_vortex_iterations.getValue());
-    line_iterations = int(slider_line_iterations.getValue());
-    line_points = int(slider_points.getValue());
-    noise_falloff = slider_noise_falloff.getValue();
-    noise_scale = slider_noise_scale.getValue();
-    noise_factor = slider_noise_factor.getValue();
-    noiseDetail(8, noise_falloff);
 }
 
 // Save SVG
