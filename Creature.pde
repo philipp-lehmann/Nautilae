@@ -267,7 +267,18 @@ class Creature {
             }
         }
     }
-    
+
+    void containPoints() {
+        int wm = int(width / 2) - border;
+        int hm = int(height / 2) - border;
+        println("contain" + wm);
+
+        for (int i = 0; i < vectors.length; ++i) {
+            PVector v = vectors[i];
+            v.x = max(min(v.x, wm), -wm);
+            v.y = max(min(v.y, hm), -hm);
+        }
+    }
     
     void assignVectorArray() {
         vectors[0] = v1;

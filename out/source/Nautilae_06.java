@@ -27,23 +27,15 @@ boolean show_controls = true;
 int mouse_timeout = 0;
 boolean record = false;
 
-// Vectors
-PVector vs1, vs2, ve1, ve2, hs1, hs2, he1, he2;
-
-
 // Colors
 int _bg1, _bg2, _bg3, _output, _primary1, _primary2, _primary3, _secondary1, _secondary2, _secondary3, _debug;
-
 
 // Creatures
 Creature creature_one; 
 
 // Sketch Parameters
-PImage vortex_img;
 boolean vortex_effect = false;
-int sketch_size = 600;
-int border = 75;
-int double_border = 2 * border;
+int border = 30;
 
 // Creature Default Properties
 float moving_speed = 1.0f;
@@ -113,10 +105,9 @@ public void draw() {
 		record = false;
 	}
 
-    creature_one.drawHandles();
-
     // Draw controls
     blendMode(NORMAL);
+    creature_one.drawHandles();
     cp5.draw();
 }
 
@@ -172,11 +163,18 @@ public boolean show_handles() {
 ControlP5 cp5;
 Slider slider_output_iterations, slider_points, slider_vortex_rotation, slider_vortex_iterations, slider_vortex_scale, slider_noise_scale, slider_noise_factor, slider_noise_falloff;
 Toggle toggle_vortex, toggle_debug;
-Button button_generate, button_record;
+Button button_generate, button_contain, button_record;
 
 
 public void setupControls() {
-    // Slider for the number of iterations between the vectors
+   toggle_debug = cp5.addToggle("setDebug")
+       .setLabel("Debug mode")
+       .setValue(debug_mode)
+       .setPosition(20, height - 30)
+       .setSize(40,10)
+       .setMode(ControlP5.SWITCH)
+       .setVisible(show_controls);
+
     slider_output_iterations = cp5.addSlider("setLineIterations")
        .setLabel("Line iterations")
        .setValue(line_iterations)
@@ -188,91 +186,76 @@ public void setupControls() {
        .setVisible(show_controls)
        ;
     
-    // Slider for the number of points draw for each line
     slider_points = cp5.addSlider("setPointsPerLine")
        .setLabel("Points per line")
        .setValue(line_points)
-       .setRange(2,1000)
-       .setNumberOfTickMarks(999)
+       .setRange(1,1000)
+       .setNumberOfTickMarks(1000)
        .showTickMarks(false)
        .setPosition(20,40)
        .setSize(200,10)
        .setVisible(show_controls)
        ;
+
+    slider_noise_scale = cp5.addSlider("setNoiseScale")
+       .setLabel("Noise scale")
+       .setValue(noise_scale)
+       .setRange(0,25)
+       .setPosition(20,80)
+       .setSize(200,10)
+       .setVisible(show_controls);
     
-    // Toggle for the vortex effect
+    slider_noise_falloff = cp5.addSlider("setNoiseFalloff")
+       .setLabel("Noise falloff")
+       .setValue(noise_falloff)
+       .setRange(0,1)
+       .setPosition(20,100)
+       .setSize(200,10)
+       .setVisible(show_controls);
+    
+    slider_noise_factor = cp5.addSlider("setNoiseFactor")
+       .setLabel("Noise factor")
+       .setValue(noise_factor)
+       .setRange(0.001f,0.1f)
+       .setPosition(20,120)
+       .setSize(200,10)
+       .setVisible(show_controls);
+    
     toggle_vortex = cp5.addToggle("setVortex")
        .setLabel("Vortex")
+       .setLabelVisible(false)
        .setValue(vortex_effect)
-       .setPosition(20,80)
+       .setPosition(20,160)
        .setSize(60,10)
        .setMode(ControlP5.SWITCH)
        .setVisible(show_controls);
        
-    toggle_debug = cp5.addToggle("setDebug")
-       .setLabel("Debug mode")
-       .setValue(debug_mode)
-       .setPosition(20, height - 30)
-       .setSize(40,10)
-       .setMode(ControlP5.SWITCH)
-       .setVisible(show_controls);
-    
-    // Slider to adjust the rotation of each vortex iteration
     slider_vortex_rotation = cp5.addSlider("setVortexRotation")
        .setLabel("Vortex Rotation")
        .setValue(vortex_rotation)
        .setRange(-180,180)
        .setNumberOfTickMarks(121)
        .showTickMarks(false)
-       .setPosition(20,100)
+       .setPosition(20,180)
        .setSize(200,10)
        .setVisible(show_controls);
-           // Slider to adjust the rotation of each vortex iteration
+
     slider_vortex_scale = cp5.addSlider("setVortexScale")
        .setLabel("Vortex Scale")
        .setValue(vortex_scale)
        .setRange(0.3f, 1.0f)
-       .setPosition(20,120)
-       .setSize(200,10)
-       .setVisible(show_controls);
-    
-    // Slider to adjust the numbers of vortex iterations
-    slider_vortex_iterations = cp5.addSlider("setVortexIterations")
-       .setLabel("Vortex Iterations")
-       .setValue(vortex_iterations)
-       .setRange(1,10)
-       .setPosition(20,140)
-       .setSize(200,10)
-       .setVisible(show_controls);
-    
-    // Slider to adjust the noise falloff for the details
-    slider_noise_scale = cp5.addSlider("setNoiseScale")
-       .setLabel("Noise scale")
-       .setValue(noise_scale)
-       .setRange(0,25)
-       .setPosition(20,160)
-       .setSize(200,10)
-       .setVisible(show_controls);
-    
-    // Slider to adjust the noise offset radius
-    slider_noise_falloff = cp5.addSlider("setNoiseFalloff")
-       .setLabel("Noise falloff")
-       .setValue(noise_falloff)
-       .setRange(0,1)
-       .setPosition(20,180)
-       .setSize(200,10)
-       .setVisible(show_controls);
-    
-    // Slider to adjust the noise detail level
-    slider_noise_factor = cp5.addSlider("setNoiseFactor")
-       .setLabel("Noise factor")
-       .setValue(noise_factor)
-       .setRange(0.001f,0.1f)
        .setPosition(20,200)
        .setSize(200,10)
        .setVisible(show_controls);
     
-    // create a new button with name 'buttonA'
+    slider_vortex_iterations = cp5.addSlider("setVortexIterations")
+       .setLabel("Vortex Iterations")
+       .setValue(vortex_iterations)
+       .setRange(1,10)
+       .setPosition(20,220)
+       .setSize(200,10)
+       .setVisible(show_controls);
+    
     button_generate = cp5.addButton("createCreature")
        .setLabel("Create")
        .setValue(0)
@@ -280,8 +263,12 @@ public void setupControls() {
        .setSize(60,50)
        .setVisible(show_controls);
     
-    button_record = cp5.addButton("saveSVG")
+    button_contain = cp5.addButton("contain")
         	.setPosition(width - 80,80)
+        	.setSize(60, 20);
+
+    button_record = cp5.addButton("saveSVG")
+        	.setPosition(width - 80,120)
         	.setSize(60, 20);
 
 
@@ -354,6 +341,12 @@ public void controlEvent(ControlEvent theControlEvent) {
 // Save SVG
 public void saveSVG() {
     record = true;
+}
+
+// Contain points to artboard() {
+public void contain() {
+   println("contain");
+   creature_one.containPoints();
 }
 class Creature { 
     
@@ -624,7 +617,18 @@ class Creature {
             }
         }
     }
-    
+
+    public void containPoints() {
+        int wm = PApplet.parseInt(width / 2) - border;
+        int hm = PApplet.parseInt(height / 2) - border;
+        println("contain" + wm);
+
+        for (int i = 0; i < vectors.length; ++i) {
+            PVector v = vectors[i];
+            v.x = max(min(v.x, wm), -wm);
+            v.y = max(min(v.y, hm), -hm);
+        }
+    }
     
     public void assignVectorArray() {
         vectors[0] = v1;
@@ -643,7 +647,7 @@ class Creature {
 } 
 
 
-  public void settings() { size(800, 800);
+  public void settings() { size(1024, 1024);
 smooth(); }
 
   static public void main(String[] passedArgs) {

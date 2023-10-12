@@ -7,23 +7,15 @@ boolean show_controls = true;
 int mouse_timeout = 0;
 boolean record = false;
 
-// Vectors
-PVector vs1, vs2, ve1, ve2, hs1, hs2, he1, he2;
-
-
 // Colors
 color _bg1, _bg2, _bg3, _output, _primary1, _primary2, _primary3, _secondary1, _secondary2, _secondary3, _debug;
-
 
 // Creatures
 Creature creature_one; 
 
 // Sketch Parameters
-PImage vortex_img;
 boolean vortex_effect = false;
-int sketch_size = 600;
-int border = 75;
-int double_border = 2 * border;
+int border = 30;
 
 // Creature Default Properties
 float moving_speed = 1.0;
@@ -41,7 +33,7 @@ float noise_factor = 0.02;
 void setup() {
     // Setup the stage
     smooth();
-    size(800, 800);
+    size(1024, 1024);
     strokeCap(ROUND);
     strokeJoin(ROUND);
     ellipseMode(CENTER);
@@ -93,10 +85,9 @@ void draw() {
 		record = false;
 	}
 
-    creature_one.drawHandles();
-
     // Draw controls
     blendMode(NORMAL);
+    creature_one.drawHandles();
     cp5.draw();
 }
 
