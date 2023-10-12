@@ -32,6 +32,7 @@ int line_points = 40;
 
 int vortex_iterations = 5;
 float vortex_rotation = 5.0;
+float vortex_scale = 0.9;
 
 float noise_scale = 0.0;
 float noise_falloff = 0.8;
@@ -53,7 +54,7 @@ void setup() {
     _bg1 = color(0, 0, 8);
     _bg2 = color(0, 0, 18);
     _bg3 = color(0, 0, 30);
-    _output = color(180, 5, 250);
+    _output = color(180, 5, 230);
     _primary1 = color(180, 80, 100);
     _primary2 = color(180, 80, 80);
     _primary3 = color(180, 80, 60);

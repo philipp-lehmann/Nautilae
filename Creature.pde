@@ -166,7 +166,7 @@ class Creature {
             }
             // Apply transform
             rotate(radians(vortex_rotation));
-            scale(1 - ((float) a / vortex_iterations * 0.5));
+            scale(vortex_scale);
         }
         
         popMatrix();

@@ -52,6 +52,7 @@ int line_points = 40;
 
 int vortex_iterations = 5;
 float vortex_rotation = 5.0f;
+float vortex_scale = 0.9f;
 
 float noise_scale = 0.0f;
 float noise_falloff = 0.8f;
@@ -73,7 +74,7 @@ public void setup() {
     _bg1 = color(0, 0, 8);
     _bg2 = color(0, 0, 18);
     _bg3 = color(0, 0, 30);
-    _output = color(180, 5, 250);
+    _output = color(180, 5, 230);
     _primary1 = color(180, 80, 100);
     _primary2 = color(180, 80, 80);
     _primary3 = color(180, 80, 60);
@@ -169,7 +170,7 @@ public boolean show_handles() {
 }
 // Controls
 ControlP5 cp5;
-Slider slider_output_iterations, slider_points, slider_vortex_rotation, slider_vortex_iterations, slider_noise_scale, slider_noise_factor, slider_noise_falloff;
+Slider slider_output_iterations, slider_points, slider_vortex_rotation, slider_vortex_iterations, slider_vortex_scale, slider_noise_scale, slider_noise_factor, slider_noise_falloff;
 Toggle toggle_vortex, toggle_debug;
 Button button_generate, button_record;
 
@@ -221,7 +222,17 @@ public void setupControls() {
        .setLabel("Vortex Rotation")
        .setValue(vortex_rotation)
        .setRange(-180,180)
+       .setNumberOfTickMarks(121)
+       .showTickMarks(false)
        .setPosition(20,100)
+       .setSize(200,10)
+       .setVisible(show_controls);
+           // Slider to adjust the rotation of each vortex iteration
+    slider_vortex_scale = cp5.addSlider("setVortexScale")
+       .setLabel("Vortex Scale")
+       .setValue(vortex_scale)
+       .setRange(0.3f, 1.0f)
+       .setPosition(20,120)
        .setSize(200,10)
        .setVisible(show_controls);
     
@@ -230,7 +241,7 @@ public void setupControls() {
        .setLabel("Vortex Iterations")
        .setValue(vortex_iterations)
        .setRange(1,10)
-       .setPosition(20,120)
+       .setPosition(20,140)
        .setSize(200,10)
        .setVisible(show_controls);
     
@@ -257,7 +268,7 @@ public void setupControls() {
        .setLabel("Noise factor")
        .setValue(noise_factor)
        .setRange(0.001f,0.1f)
-       .setPosition(20,240)
+       .setPosition(20,200)
        .setSize(200,10)
        .setVisible(show_controls);
     
@@ -312,6 +323,7 @@ public void toggleControls(boolean show_hide) {
     slider_output_iterations.setVisible(show_controls); 
     slider_points.setVisible(show_controls); 
     slider_vortex_rotation.setVisible(show_controls); 
+    slider_vortex_scale.setVisible(show_controls); 
     slider_vortex_iterations.setVisible(show_controls); 
     slider_noise_scale.setVisible(show_controls); 
     slider_noise_factor.setVisible(show_controls); 
@@ -325,6 +337,7 @@ public void controlEvent(ControlEvent theControlEvent) {
     if (creature_one != null) {
         vortex_effect = PApplet.parseBoolean(PApplet.parseInt(toggle_vortex.getValue()));
         vortex_rotation = slider_vortex_rotation.getValue();
+        vortex_scale = slider_vortex_scale.getValue();
         vortex_iterations = PApplet.parseInt(slider_vortex_iterations.getValue());
         line_iterations = PApplet.parseInt(slider_output_iterations.getValue());
         line_points = PApplet.parseInt(slider_points.getValue());
@@ -332,8 +345,6 @@ public void controlEvent(ControlEvent theControlEvent) {
         noise_scale = slider_noise_scale.getValue();
         noise_factor = slider_noise_factor.getValue();
         noiseDetail(8, noise_falloff);
-        
-        println("print: " + toggle_debug.getValue() + " . " + debug_mode);
         debug_mode = PApplet.parseBoolean(PApplet.parseInt(toggle_debug.getValue()));
         creature_one.line_iterations = line_iterations;
         creature_one.line_points = line_points;
@@ -512,7 +523,7 @@ class Creature {
             }
             // Apply transform
             rotate(radians(vortex_rotation));
-            scale(1 - ((float) a / vortex_iterations * 0.5f));
+            scale(vortex_scale);
         }
         
         popMatrix();

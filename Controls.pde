@@ -1,12 +1,11 @@
 // Controls
 ControlP5 cp5;
-Slider slider_output_iterations, slider_points, slider_vortex_rotation, slider_vortex_iterations, slider_noise_scale, slider_noise_factor, slider_noise_falloff;
+Slider slider_output_iterations, slider_points, slider_vortex_rotation, slider_vortex_iterations, slider_vortex_scale, slider_noise_scale, slider_noise_factor, slider_noise_falloff;
 Toggle toggle_vortex, toggle_debug;
 Button button_generate, button_record;
 
 
 void setupControls() {
-    // Slider for the number of iterations between the vectors
     slider_output_iterations = cp5.addSlider("setLineIterations")
        .setLabel("Line iterations")
        .setValue(line_iterations)
@@ -18,7 +17,6 @@ void setupControls() {
        .setVisible(show_controls)
        ;
     
-    // Slider for the number of points draw for each line
     slider_points = cp5.addSlider("setPointsPerLine")
        .setLabel("Points per line")
        .setValue(line_points)
@@ -30,7 +28,6 @@ void setupControls() {
        .setVisible(show_controls)
        ;
     
-    // Toggle for the vortex effect
     toggle_vortex = cp5.addToggle("setVortex")
        .setLabel("Vortex")
        .setValue(vortex_effect)
@@ -47,25 +44,32 @@ void setupControls() {
        .setMode(ControlP5.SWITCH)
        .setVisible(show_controls);
     
-    // Slider to adjust the rotation of each vortex iteration
     slider_vortex_rotation = cp5.addSlider("setVortexRotation")
        .setLabel("Vortex Rotation")
        .setValue(vortex_rotation)
        .setRange(-180,180)
+       .setNumberOfTickMarks(121)
+       .showTickMarks(false)
        .setPosition(20,100)
        .setSize(200,10)
        .setVisible(show_controls);
-    
-    // Slider to adjust the numbers of vortex iterations
-    slider_vortex_iterations = cp5.addSlider("setVortexIterations")
-       .setLabel("Vortex Iterations")
-       .setValue(vortex_iterations)
-       .setRange(1,10)
+
+    slider_vortex_scale = cp5.addSlider("setVortexScale")
+       .setLabel("Vortex Scale")
+       .setValue(vortex_scale)
+       .setRange(0.3, 1.0)
        .setPosition(20,120)
        .setSize(200,10)
        .setVisible(show_controls);
     
-    // Slider to adjust the noise falloff for the details
+    slider_vortex_iterations = cp5.addSlider("setVortexIterations")
+       .setLabel("Vortex Iterations")
+       .setValue(vortex_iterations)
+       .setRange(1,10)
+       .setPosition(20,140)
+       .setSize(200,10)
+       .setVisible(show_controls);
+    
     slider_noise_scale = cp5.addSlider("setNoiseScale")
        .setLabel("Noise scale")
        .setValue(noise_scale)
@@ -74,7 +78,6 @@ void setupControls() {
        .setSize(200,10)
        .setVisible(show_controls);
     
-    // Slider to adjust the noise offset radius
     slider_noise_falloff = cp5.addSlider("setNoiseFalloff")
        .setLabel("Noise falloff")
        .setValue(noise_falloff)
@@ -83,7 +86,6 @@ void setupControls() {
        .setSize(200,10)
        .setVisible(show_controls);
     
-    // Slider to adjust the noise detail level
     slider_noise_factor = cp5.addSlider("setNoiseFactor")
        .setLabel("Noise factor")
        .setValue(noise_factor)
@@ -92,7 +94,6 @@ void setupControls() {
        .setSize(200,10)
        .setVisible(show_controls);
     
-    // create a new button with name 'buttonA'
     button_generate = cp5.addButton("createCreature")
        .setLabel("Create")
        .setValue(0)
@@ -143,6 +144,7 @@ void toggleControls(boolean show_hide) {
     slider_output_iterations.setVisible(show_controls); 
     slider_points.setVisible(show_controls); 
     slider_vortex_rotation.setVisible(show_controls); 
+    slider_vortex_scale.setVisible(show_controls); 
     slider_vortex_iterations.setVisible(show_controls); 
     slider_noise_scale.setVisible(show_controls); 
     slider_noise_factor.setVisible(show_controls); 
@@ -156,6 +158,7 @@ void controlEvent(ControlEvent theControlEvent) {
     if (creature_one != null) {
         vortex_effect = boolean(int(toggle_vortex.getValue()));
         vortex_rotation = slider_vortex_rotation.getValue();
+        vortex_scale = slider_vortex_scale.getValue();
         vortex_iterations = int(slider_vortex_iterations.getValue());
         line_iterations = int(slider_output_iterations.getValue());
         line_points = int(slider_points.getValue());
