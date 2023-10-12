@@ -109,6 +109,10 @@ class Creature {
         
         // Lines
         for (int a = 1; a <= numVortex; a++) {
+
+            // Flip if enabled
+            if (vortex_flip) { scale(-1, 1);}
+
             // Draw the interpolation lines
             for (int i = 0; i < line_iterations; i++) {
                 

@@ -28,7 +28,7 @@ int mouse_timeout = 0;
 boolean record = false;
 
 // Colors
-int _bg1, _bg2, _bg3, _output, _primary1, _primary2, _primary3, _secondary1, _secondary2, _secondary3, _debug;
+int _bg1, _bg2, _bg3, _output, _outputDisplay, _outputExport, _primary1, _primary2, _primary3, _secondary1, _secondary2, _secondary3, _debug;
 
 // Creatures
 Creature creature_one; 
@@ -43,6 +43,7 @@ int line_iterations = 20;
 int line_points = 40;
 
 int vortex_iterations = 5;
+boolean vortex_flip = false;
 float vortex_rotation = 5.0f;
 float vortex_scale = 0.9f;
 
@@ -66,7 +67,9 @@ public void setup() {
     _bg1 = color(0, 0, 8);
     _bg2 = color(0, 0, 18);
     _bg3 = color(0, 0, 30);
-    _output = color(180, 5, 230);
+    _outputDisplay = color(180, 5, 230);
+    _outputExport = color(0, 0, 0);
+    _output = _outputDisplay;
     _primary1 = color(180, 80, 100);
     _primary2 = color(180, 80, 80);
     _primary3 = color(180, 80, 60);
@@ -89,6 +92,7 @@ public void draw() {
 
     // Start recording
     if (record) {
+        _output = _outputExport;
 		beginRecord(SVG, "export/objects-" + dateString() + ".svg");
     }
 
@@ -102,6 +106,7 @@ public void draw() {
     // End SVG recording...
 	if (record) {
 		endRecord();
+        _output = _outputDisplay;
 		record = false;
 	}
 
@@ -162,7 +167,7 @@ public boolean show_handles() {
 // Controls
 ControlP5 cp5;
 Slider slider_output_iterations, slider_points, slider_vortex_rotation, slider_vortex_iterations, slider_vortex_scale, slider_noise_scale, slider_noise_factor, slider_noise_falloff;
-Toggle toggle_vortex, toggle_debug;
+Toggle toggle_vortex, toggle_debug, toggle_flip;
 Button button_generate, button_contain, button_record;
 
 
@@ -226,6 +231,15 @@ public void setupControls() {
        .setLabelVisible(false)
        .setValue(vortex_effect)
        .setPosition(20,160)
+       .setSize(60,10)
+       .setMode(ControlP5.SWITCH)
+       .setVisible(show_controls);
+   
+    toggle_flip = cp5.addToggle("flipVortext")
+       .setLabel("flip")
+       .setLabelVisible(false)
+       .setValue(vortex_effect)
+       .setPosition(90,160)
        .setSize(60,10)
        .setMode(ControlP5.SWITCH)
        .setVisible(show_controls);
@@ -315,6 +329,7 @@ public void toggleControls(boolean show_hide) {
     slider_noise_scale.setVisible(show_controls); 
     slider_noise_factor.setVisible(show_controls); 
     slider_noise_falloff.setVisible(show_controls);
+    toggle_flip.setVisible(show_controls);
     toggle_vortex.setVisible(show_controls);
     toggle_debug.setVisible(show_controls);
 }
@@ -323,6 +338,7 @@ public void toggleControls(boolean show_hide) {
 public void controlEvent(ControlEvent theControlEvent) {
     if (creature_one != null) {
         vortex_effect = PApplet.parseBoolean(PApplet.parseInt(toggle_vortex.getValue()));
+        vortex_flip = PApplet.parseBoolean(PApplet.parseInt(toggle_flip.getValue()));
         vortex_rotation = slider_vortex_rotation.getValue();
         vortex_scale = slider_vortex_scale.getValue();
         vortex_iterations = PApplet.parseInt(slider_vortex_iterations.getValue());
@@ -459,6 +475,10 @@ class Creature {
         
         // Lines
         for (int a = 1; a <= numVortex; a++) {
+
+            // Flip if enabled
+            if (vortex_flip) { scale(-1, 1);}
+
             // Draw the interpolation lines
             for (int i = 0; i < line_iterations; i++) {
                 

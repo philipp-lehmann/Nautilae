@@ -1,7 +1,7 @@
 // Controls
 ControlP5 cp5;
 Slider slider_output_iterations, slider_points, slider_vortex_rotation, slider_vortex_iterations, slider_vortex_scale, slider_noise_scale, slider_noise_factor, slider_noise_falloff;
-Toggle toggle_vortex, toggle_debug;
+Toggle toggle_vortex, toggle_debug, toggle_flip;
 Button button_generate, button_contain, button_record;
 
 
@@ -65,6 +65,15 @@ void setupControls() {
        .setLabelVisible(false)
        .setValue(vortex_effect)
        .setPosition(20,160)
+       .setSize(60,10)
+       .setMode(ControlP5.SWITCH)
+       .setVisible(show_controls);
+   
+    toggle_flip = cp5.addToggle("flipVortext")
+       .setLabel("flip")
+       .setLabelVisible(false)
+       .setValue(vortex_effect)
+       .setPosition(90,160)
        .setSize(60,10)
        .setMode(ControlP5.SWITCH)
        .setVisible(show_controls);
@@ -154,6 +163,7 @@ void toggleControls(boolean show_hide) {
     slider_noise_scale.setVisible(show_controls); 
     slider_noise_factor.setVisible(show_controls); 
     slider_noise_falloff.setVisible(show_controls);
+    toggle_flip.setVisible(show_controls);
     toggle_vortex.setVisible(show_controls);
     toggle_debug.setVisible(show_controls);
 }
@@ -162,6 +172,7 @@ void toggleControls(boolean show_hide) {
 void controlEvent(ControlEvent theControlEvent) {
     if (creature_one != null) {
         vortex_effect = boolean(int(toggle_vortex.getValue()));
+        vortex_flip = boolean(int(toggle_flip.getValue()));
         vortex_rotation = slider_vortex_rotation.getValue();
         vortex_scale = slider_vortex_scale.getValue();
         vortex_iterations = int(slider_vortex_iterations.getValue());

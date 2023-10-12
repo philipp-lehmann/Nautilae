@@ -8,7 +8,7 @@ int mouse_timeout = 0;
 boolean record = false;
 
 // Colors
-color _bg1, _bg2, _bg3, _output, _primary1, _primary2, _primary3, _secondary1, _secondary2, _secondary3, _debug;
+color _bg1, _bg2, _bg3, _output, _outputDisplay, _outputExport, _primary1, _primary2, _primary3, _secondary1, _secondary2, _secondary3, _debug;
 
 // Creatures
 Creature creature_one; 
@@ -23,6 +23,7 @@ int line_iterations = 20;
 int line_points = 40;
 
 int vortex_iterations = 5;
+boolean vortex_flip = false;
 float vortex_rotation = 5.0;
 float vortex_scale = 0.9;
 
@@ -46,7 +47,9 @@ void setup() {
     _bg1 = color(0, 0, 8);
     _bg2 = color(0, 0, 18);
     _bg3 = color(0, 0, 30);
-    _output = color(180, 5, 230);
+    _outputDisplay = color(180, 5, 230);
+    _outputExport = color(0, 0, 0);
+    _output = _outputDisplay;
     _primary1 = color(180, 80, 100);
     _primary2 = color(180, 80, 80);
     _primary3 = color(180, 80, 60);
@@ -69,6 +72,7 @@ void draw() {
 
     // Start recording
     if (record) {
+        _output = _outputExport;
 		beginRecord(SVG, "export/objects-" + dateString() + ".svg");
     }
 
@@ -82,6 +86,7 @@ void draw() {
     // End SVG recording...
 	if (record) {
 		endRecord();
+        _output = _outputDisplay;
 		record = false;
 	}
 
