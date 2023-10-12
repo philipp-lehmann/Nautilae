@@ -3,12 +3,13 @@ import controlP5.*;
 
 
 boolean debug_mode = true;
+boolean show_handles = true;
 
 // Controls
 ControlP5 cp5;
-Slider slider_line_iterations, slider_points, slider_speed, slider_vortex_rotation, slider_vortex_iterations, slider_noise_scale, slider_noise_factor, slider_noise_falloff;
+Slider slider_line_iterations, slider_points, slider_vortex_rotation, slider_vortex_iterations, slider_noise_scale, slider_noise_factor, slider_noise_falloff;
 Toggle toggle_vortex, toggle_debug;
-Button button_generate, button_reset, button_record;
+Button button_generate, button_record;
 
 // Interface status
 boolean show_controls = true;
@@ -64,14 +65,24 @@ void draw() {
 		beginRecord(SVG, "export/objects-" + dateString() + ".svg");
     }
 
-    drawCreature();
+    // Update every frame
+    blendMode(NORMAL);
+    creature_one.update();
+    creature_one.draw();
+    creature_one.checkSelection();
+    
 
     // End SVG recording...
 	if (record) {
 		endRecord();
 		record = false;
 	}
-    drawControls();
+
+    creature_one.drawHandles();
+
+    // Draw controls
+    blendMode(NORMAL);
+    cp5.draw();
 }
 
 void keyPressed() {
@@ -87,7 +98,6 @@ void keyPressed() {
 }
 
 public void createCreature() {
-    updateControlValues();
     creature_one = newCreature(); 
 }
 

@@ -11,17 +11,6 @@ void setupControls() {
        ;
     
     // Slider for the number of points draw for each line
-    slider_speed = cp5.addSlider("setMovingSpeed")
-       .setLabel("Moving speed")
-       .setValue(moving_speed)
-       .setRange(0,10)
-       .setNumberOfTickMarks(11)
-       .setPosition(20,40)
-       .setSize(200,10)
-       .setVisible(show_controls)
-       ;
-    
-    // Slider for the number of points draw for each line
     slider_points = cp5.addSlider("setPointsPerLine")
        .setLabel("Points per line")
        .setValue(line_points)
@@ -111,20 +100,41 @@ void showControls() {
     hideControls();
     toggleControls(true);
 }
+
 void hideControls() {
     toggleControls(false);
 }
+
 void toggleControls() {
     show_controls = !show_controls;
+    show_handles = show_controls;
     toggleControls(show_controls);
 }
+
 void toggleControls(boolean show_hide) {
     show_controls = show_hide;
     
-    // show and hide default controls
+    // Show and hide default controls
     button_generate.setVisible(show_controls);
-    button_reset.setVisible(show_controls);
+    button_record.setVisible(show_controls);
     slider_line_iterations.setVisible(show_controls); 
+    slider_points.setVisible(show_controls); 
+    slider_vortex_rotation.setVisible(show_controls); 
+    slider_vortex_iterations.setVisible(show_controls); 
+    slider_noise_scale.setVisible(show_controls); 
+    slider_noise_factor.setVisible(show_controls); 
+    slider_noise_falloff.setVisible(show_controls);
+    toggle_vortex.setVisible(show_controls);
+    toggle_debug.setVisible(show_controls);
+}
+
+// Control event
+void controlEvent(ControlEvent theControlEvent) {
+   if (creature_one != null) {
+      updateControlValues();
+      creature_one.line_iterations = line_iterations;
+      creature_one.line_points = line_points;
+   }
 }
 
 // Update parameters 
@@ -133,7 +143,6 @@ void updateControlValues() {
     debug_mode = boolean(int(toggle_debug.getValue()));
     vortex_rotation = slider_vortex_rotation.getValue();
     vortex_iterations = int(slider_vortex_iterations.getValue());
-    moving_speed = slider_speed.getValue();
     line_iterations = int(slider_line_iterations.getValue());
     line_points = int(slider_points.getValue());
     noise_falloff = slider_noise_falloff.getValue();
@@ -142,19 +151,7 @@ void updateControlValues() {
     noiseDetail(8, noise_falloff);
 }
 
-// Update parameters 
-void resetControls() {
-    toggle_vortex.setValue(0);
-    slider_vortex_rotation.setValue(0.0);
-    slider_vortex_iterations.setValue(0.0);
-    slider_speed.setValue(0);
-    slider_line_iterations.setValue(1);
-    slider_points.setValue(400);
-    hideControls();
-    createCreature();
-}
-
-
+// Save SVG
 void saveSVG() {
     record = true;
 }
