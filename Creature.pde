@@ -121,9 +121,6 @@ class Creature {
         // Lines
         for (int a = 1; a <= numVortex; a++) {
 
-            // Flip if enabled
-            if (vortex_flip) { scale(-1, 1);}
-
             // Draw the interpolation lines
             for (int i = 0; i < line_iterations; i++) {
                 
@@ -160,13 +157,23 @@ class Creature {
                     PVector h = new PVector(noise_scale * n2, 0);
                     h.rotate(n1 * 2 * TWO_PI);
 
-                    PVector pOut = PVector.add(pt, h);       
+                    PVector pOut = PVector.add(pt, h);  
+
+                    // Flip if enabled
+                    if (vortex_flip && (a%2 == 0)) {
+                        // scale(-1, 1);
+                        pOut.x = -pOut.x;
+                    }     
 
                     // Add distorsion
                     for (PVector dv : distorsions) {
                         float ddist = pOut.dist(dv);
+                        PVector dir = PVector.sub(dv, pOut);
                         float df = min(map(ddist, distorsion_radius, 0, 1, 0), 1);
-                        pOut = PVector.lerp(d1, pOut, df);
+                        dir.mult(df * df * -0.5 );
+
+                        pOut = pOut.add(dir);
+                        // pOut = PVector.lerp(d1, pOut, df);
                     }
                     
                     // Debug mode
@@ -319,7 +326,7 @@ class Creature {
     void assignVectorArray() {
         PVector[] v = {v1, v2, v3, v4, h1, h2, h3, h4, c1, c2, c3, c4, d1, d2, d3};
         vectors = v;
-        PVector[] d = {d1, d2, d3};
+        PVector[] d = {d1};
         distorsions = d;
     } 
 } 
