@@ -1,10 +1,13 @@
 class Creature { 
     
     // Points
-    PVector[] vectors = new PVector[12];
+    PVector[] vectors = new PVector[15];
+    PVector[] distorsions = new PVector[3];
+
     PVector v1, v2, v3, v4;
     PVector h1, h2, h3, h4;
     PVector c1, c2, c3, c4;
+    PVector d1, d2, d3;
     
     // Movements
     PVector m1, m2, m3, m4;
@@ -14,6 +17,9 @@ class Creature {
     int line_iterations = 15;
     int line_points = 400;
     int stroke_weight = 5;
+
+    // Distorsion
+    int distorsion_radius = 300;
     
     // Noise
     float line_interpolation = 1 / float(line_iterations);
@@ -56,6 +62,11 @@ class Creature {
         c2 = randomPos();
         c3 = randomPos();
         c4 = randomPos();
+
+        // Distorsion point
+        d1 = randomPos();
+        d2 = randomPos();
+        d3 = randomPos();
         
         if (debug_mode) {
             h1 = new PVector( - 250, -100);
@@ -148,9 +159,17 @@ class Creature {
                     PVector pt = new PVector(x, y);
                     PVector h = new PVector(noise_scale * n2, 0);
                     h.rotate(n1 * 2 * TWO_PI);
+
+                    PVector pOut = PVector.add(pt, h);       
+
+                    // Add distorsion
+                    for (PVector dv : distorsions) {
+                        float ddist = pOut.dist(dv);
+                        float df = min(map(ddist, distorsion_radius, 0, 1, 0), 1);
+                        pOut = PVector.lerp(d1, pOut, df);
+                    }
                     
-                    PVector pOut = PVector.add(pt, h);
-                    
+                    // Debug mode
                     if (debug_mode) {
                         noStroke();
                         fill(_secondary3, 30);
@@ -213,13 +232,12 @@ class Creature {
             text("C3", c3.x, c3.y + 20);
             circle(c4.x, c4.y, handle_size);
             text("C4", c4.x, c4.y + 20);
+
             
+            // Handle lines
+            stroke(_primary3);
             noFill();
             strokeWeight(1);
-            
-            
-            // Bezier Lines
-            stroke(_primary3);
             line(v1.x, v1.y, h1.x, h1.y);
             line(h1.x, h1.y, h2.x, h2.y);
             line(h2.x, h2.y, v2.x, v2.y);
@@ -229,7 +247,7 @@ class Creature {
             line(h3.x, h3.y, h4.x, h4.y);
             line(h4.x, h4.y, v4.x, v4.y);
             
-            // Distort controls
+            // Control lines
             stroke(_primary2);
             line(v1.x, v1.y, c1.x, c1.y);
             line(v2.x, v2.y, c2.x, c2.y);
@@ -237,6 +255,18 @@ class Creature {
             stroke(_secondary3);
             line(v3.x, v3.y, c3.x, c3.y);
             line(v4.x, v4.y, c4.x, c4.y);
+
+            // Distorsion point
+            for (PVector d : distorsions) {
+                fill(_secondary1);
+                noStroke();
+                circle(d.x, d.y, handle_size);
+
+                stroke(_secondary3);
+                noFill();
+                strokeWeight(1);
+                circle(d.x, d.y, distorsion_radius * 2);
+            }
             
             popMatrix();
         }
@@ -287,17 +317,9 @@ class Creature {
     }
     
     void assignVectorArray() {
-        vectors[0] = v1;
-        vectors[1] = v2;
-        vectors[2] = v3;
-        vectors[3] = v4;
-        vectors[4] = h1;
-        vectors[5] = h2;
-        vectors[6] = h3;
-        vectors[7] = h4;
-        vectors[8] = c1;
-        vectors[9] = c2;
-        vectors[10] = c3;
-        vectors[11] = c4;
+        PVector[] v = {v1, v2, v3, v4, h1, h2, h3, h4, c1, c2, c3, c4, d1, d2, d3};
+        vectors = v;
+        PVector[] d = {d1, d2, d3};
+        distorsions = d;
     } 
 } 
